@@ -1,0 +1,7 @@
+# Prettier-configuratie - https://prettier.io/docs/options
+# Formatteert de Markdown en de YAML in deze repo. Go gaat via gofmt en de
+# presentatie blijft met de hand opgemaakt; zie .prettierignore.
+printWidth: 100
+tabWidth: 2
+proseWrap: preserve # laat de handmatige regelafbreking in de tekst staan
+endOfLine: lf # gelijk aan .gitattributes (eol=lf)

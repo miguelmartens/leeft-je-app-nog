@@ -12,12 +12,12 @@ Het draaiboek voor de live demo staat in [`DRAAIBOEK.md`](DRAAIBOEK.md).
 
 ## Wat je nodig hebt
 
-| Tool | Waarvoor |
-|---|---|
-| [kind](https://kind.sigs.k8s.io/) | het lokale cluster |
-| [kubectl](https://kubernetes.io/docs/tasks/tools/) | met het cluster praten |
-| [Docker](https://docs.docker.com/get-docker/) | het image bouwen |
-| [Go](https://go.dev/dl/) 1.27 | alleen als je de app wilt aanpassen |
+| Tool                                               | Waarvoor                            |
+| -------------------------------------------------- | ----------------------------------- |
+| [kind](https://kind.sigs.k8s.io/)                  | het lokale cluster                  |
+| [kubectl](https://kubernetes.io/docs/tasks/tools/) | met het cluster praten              |
+| [Docker](https://docs.docker.com/get-docker/)      | het image bouwen                    |
+| [Go](https://go.dev/dl/) 1.27                      | alleen als je de app wilt aanpassen |
 
 Kubernetes 1.30 of nieuwer, want het manifest gebruikt de `sleep`-preStop-hook.
 De node-image die kind standaard meelevert voldoet.
@@ -88,12 +88,12 @@ Elk bestand in `demo/k8s/kapot/` is een volledig manifest dat op precies één
 punt afwijkt van `demo/k8s/deployment.yaml`. Bovenin staat wat er kapot is en
 wat de fix is.
 
-| Bestand | Kapot | Gevolg |
-|---|---|---|
-| `1-zonder-readiness.yaml` | geen readinessProbe | verkeer naar pods die nog opstarten |
-| `2-liveness-checkt-dependency.yaml` | liveness wijst naar `/readyz` | alle replica's herstarten tegelijk |
-| `3-trage-start.yaml` | 90s opstarten, geen startupProbe | CrashLoopBackOff |
-| `4-zonder-prestop.yaml` | geen preStop, grace period 1s | gedropte requests bij een update |
+| Bestand                             | Kapot                            | Gevolg                              |
+| ----------------------------------- | -------------------------------- | ----------------------------------- |
+| `1-zonder-readiness.yaml`           | geen readinessProbe              | verkeer naar pods die nog opstarten |
+| `2-liveness-checkt-dependency.yaml` | liveness wijst naar `/readyz`    | alle replica's herstarten tegelijk  |
+| `3-trage-start.yaml`                | 90s opstarten, geen startupProbe | CrashLoopBackOff                    |
+| `4-zonder-prestop.yaml`             | geen preStop, grace period 1s    | gedropte requests bij een update    |
 
 Het verschil bekijken:
 
@@ -131,4 +131,4 @@ readiness) lopen door de hele presentatie heen.
 
 `.github/workflows/pages.yaml` bouwt de slides bij elke push naar `main` en zet
 ze op GitHub Pages. Zet daarvoor eenmalig **Settings → Pages → Source** op
-*GitHub Actions*.
+_GitHub Actions_.

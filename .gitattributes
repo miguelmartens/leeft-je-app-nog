@@ -1,0 +1,21 @@
+# Alles in de repo en in de werkmap op LF. Dit is een Unix-project (macOS
+# lokaal, Linux in kind en op de GitHub-runner) en een CRLF sloopt zowel de
+# recepten in de Makefile als de shell-fragmenten daarin.
+* text=auto eol=lf
+
+# Expliciet voor de bestandstypes die deze repo bevat. diff=golang en
+# diff=markdown geven git betere kopregels boven een diff-hunk.
+*.go        text eol=lf diff=golang
+*.md        text eol=lf diff=markdown
+*.yaml      text eol=lf
+Dockerfile  text eol=lf
+Makefile    text eol=lf
+
+# Afbeeldingen nooit normaliseren en nooit als tekst diffen.
+*.png  binary
+*.jpg  binary
+*.gif  binary
+
+# GitHub Linguist: de markdown is de presentatie en de documentatie, niet de
+# code van dit project. Zo leest de repo als het Go-project dat eronder zit.
+*.md linguist-documentation

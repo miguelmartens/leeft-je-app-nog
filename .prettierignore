@@ -1,0 +1,12 @@
+.git/
+node_modules/
+
+# Build van de slides.
+dist/
+
+# De presentatie is af en met de hand opgemaakt: het style-blok, de HTML-divs
+# en de --- tussen de slides moeten precies zo blijven staan.
+presentatie/slides.md
+
+# Go wordt door gofmt geformatteerd, niet door Prettier.
+*.go

@@ -1,0 +1,40 @@
+# EditorConfig zorgt dat elke editor dezelfde inspringing aanhoudt.
+# https://editorconfig.org
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 2
+max_line_length = 100
+
+# gofmt is hier de baas: tabs, en geen maximum regellengte.
+[*.go]
+indent_style = tab
+indent_size = 4
+max_line_length = off
+
+[go.mod]
+indent_style = tab
+indent_size = 4
+
+# Recepten moeten met echte tabs inspringen, anders weigert make ze.
+[Makefile]
+indent_style = tab
+indent_size = 4
+
+# Twee spaties aan het eind van een regel zijn in Markdown een harde
+# regelovergang - die mogen er niet af.
+[*.md]
+trim_trailing_whitespace = false
+
+[*.yaml]
+indent_style = space
+indent_size = 2
+
+[Dockerfile]
+indent_style = space
+indent_size = 4
