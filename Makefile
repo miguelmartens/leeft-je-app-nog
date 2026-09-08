@@ -14,7 +14,7 @@ KAPOT := demo/k8s/kapot
 
 .PHONY: help alles cluster build load deploy kapot-1 kapot-2 kapot-3 kapot-4 \
         herstel logs watch endpoints belasting unready dependency \
-        slides prettier prettier-check schoon
+        slides format format-check schoon
 
 ##@ Opzetten
 
@@ -105,10 +105,13 @@ dependency: ## Zet de dependency om op ALLE pods (POST /debug/dependency-down)
 slides: ## Serveer de slides lokaal met marp-cli
 	npx --yes @marp-team/marp-cli@latest -s presentatie/
 
-prettier: ## Formatteer de Markdown en YAML met Prettier
+format: ## Formatteer alles: gofmt voor Go, Prettier voor Markdown en YAML
+	gofmt -w demo
 	npx --yes prettier@3 --write . --ignore-unknown
 
-prettier-check: ## Controleer de opmaak zonder iets te wijzigen
+format-check: ## Controleer de opmaak zonder iets te wijzigen
+	@scheef=$$(gofmt -l demo); \
+	if [ -n "$$scheef" ]; then echo "niet gofmt-schoon:"; echo "$$scheef"; exit 1; fi
 	npx --yes prettier@3 --check . --ignore-unknown
 
 schoon: ## Verwijder het kind-cluster
@@ -118,6 +121,6 @@ help: ## Toon dit overzicht
 	@echo "Workshop: leeft je app nog?"
 	@awk 'BEGIN {FS = ":.*?## "} \
 	     /^##@ / {printf "\n\033[1m%s\033[0m\n", substr($$0, 5); next} \
-	     /^[a-zA-Z0-9_-]+:.*?## / {printf "  %-15s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
+	     /^[a-zA-Z0-9_-]+:.*?## / {printf "  %-14s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 	@echo
 	@echo "Voor de sessie: make alles"
