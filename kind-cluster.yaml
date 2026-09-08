@@ -1,0 +1,16 @@
+# Eén control plane en twee workers, zodat je de pods over meerdere nodes
+# verdeeld ziet staan (kubectl get pods -o wide).
+#
+# De portmapping is het enige extra: die brengt de NodePort van de Service
+# (30080) naar localhost:30080. Zo loopt je load-generator écht via de Service
+# en dus via de EndpointSlice - precies wat de demo moet laten zien.
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+nodes:
+  - role: control-plane
+    extraPortMappings:
+      - containerPort: 30080
+        hostPort: 30080
+        listenAddress: "127.0.0.1"
+  - role: worker
+  - role: worker
