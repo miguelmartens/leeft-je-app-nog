@@ -1,0 +1,16 @@
+# markdownlint-cli2 - https://github.com/DavidAnson/markdownlint-cli2
+# Bewaakt README.md en DRAAIBOEK.md: de documenten die deelnemers lezen.
+globs:
+  - "**/*.md"
+
+ignores:
+  - "node_modules/**"
+  - "dist/**"
+  # De presentatie is een Marp-bestand: elke slide heeft een eigen H1 en de
+  # hele opmaak zit in HTML-divs. Linten levert daar alleen ruis op.
+  - "presentatie/slides.md"
+
+config:
+  # Prettier bepaalt de regellengte. Twee tools die daarover ruziën levert
+  # alleen maar heen-en-weer geformatteer op.
+  MD013: false

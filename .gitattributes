@@ -8,6 +8,7 @@
 *.go        text eol=lf diff=golang
 *.md        text eol=lf diff=markdown
 *.yaml      text eol=lf
+*.json      text eol=lf
 Dockerfile  text eol=lf
 Makefile    text eol=lf
 
@@ -15,6 +16,9 @@ Makefile    text eol=lf
 *.png  binary
 *.jpg  binary
 *.gif  binary
+
+# De lockfile is gegenereerd: dichtklappen in diffs en weg uit de taalstatistiek.
+package-lock.json linguist-generated=true -diff
 
 # GitHub Linguist: de markdown is de presentatie en de documentatie, niet de
 # code van dit project. Zo leest de repo als het Go-project dat eronder zit.

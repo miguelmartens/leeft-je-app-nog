@@ -1,0 +1,99 @@
+# Lokale controles vóór een commit. https://pre-commit.com
+#
+#     brew install pre-commit
+#     pre-commit install          # of: make hooks
+#
+# Optioneel, net als Prettier. Go, kubectl en kind blijven de enige harde eisen
+# om met deze repo te werken, en de Pages-workflow leunt nergens op dit bestand.
+#
+# TWEE STAGES, MET OPZET
+#
+# Wat bij elke commit draait moet snel zijn, anders zet je het na een dag weer
+# uit. Opmaak en bestandshygiëne draaien bij `pre-commit`; `go vet` compileert
+# de hele module en wacht daarom tot `pre-push`, waar een paar seconden mag.
+#
+# WAT HIER BEWUST NIET IN STAAT
+#
+# Een `kubectl apply --dry-run` over de manifests. Die heeft een kubeconfig met
+# een bereikbaar cluster nodig, en een hook die stukgaat zodra je even geen
+# cluster hebt, zet je diezelfde dag nog uit.
+
+default_install_hook_types: [pre-commit, pre-push]
+default_stages: [pre-commit]
+
+repos:
+  # --- Bestandshygiëne: wat geen enkele formatter bijhoudt ---------------------
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: check-merge-conflict
+      - id: check-added-large-files
+      - id: check-case-conflict # een repo die op macOS én Linux blijft werken
+      - id: detect-private-key
+      - id: check-json
+      - id: check-yaml
+        # deployment.yaml en de vier kapotte varianten bevatten allemaal een
+        # Deployment én een Service in hetzelfde bestand.
+        args: [--allow-multiple-documents]
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+        # Twee spaties aan het eind zijn in Markdown een harde regelovergang,
+        # en daarom zet .editorconfig trim_trailing_whitespace = false voor *.md.
+        # Deze vlag is dezelfde uitzondering, zodat de twee elkaar niet tegenspreken.
+        args: [--markdown-linebreak-ext=md]
+      - id: mixed-line-ending
+        args: [--fix=lf]
+        # Niet dubbelop met .gitattributes, ondanks de schijn: dat bestand
+        # normaliseert wat git ópslaat, deze hook wat er op schijf staat - en dat
+        # is wat je editor, gofmt en elke grep te zien krijgen.
+
+  # --- Go ---------------------------------------------------------------------
+  #
+  # `language: system` met opzet: dit draait de go van je PATH, die go.mod al
+  # vastlegt. Een eigen toolchain hier zou een tweede versie zijn om in de pas te
+  # houden, en het eerste waarover die twee het oneens worden is een opmaakdiff
+  # die niemand kan reproduceren.
+  #
+  # `pass_filenames: false` omdat beide commando's op de module werken en niet op
+  # het rijtje bestanden dat je toevallig gestaged hebt.
+  - repo: local
+    hooks:
+      - id: gofmt
+        name: gofmt
+        entry: gofmt -l -w demo
+        language: system
+        types: [go]
+        pass_filenames: false
+
+      - id: go-vet
+        name: go vet
+        entry: sh -c 'cd demo && go vet ./...'
+        language: system
+        types: [go]
+        pass_filenames: false
+        stages: [pre-push]
+
+  # --- Alles wat gofmt niet aanraakt ------------------------------------------
+  #
+  # `language: system` in plaats van een eigen node-omgeving: package.json en
+  # package-lock.json leggen deze versies al vast. Zou pre-commit hier zijn eigen
+  # node bouwen, dan stond Prettier op twee plekken - en die twee lopen een keer
+  # uit elkaar. `npx --no-install` zorgt dat de hook eerlijk faalt als je `npm ci`
+  # nog niet gedraaid hebt, in plaats van stiekem een andere versie te halen.
+  #
+  # Prettier volgt .prettierignore ook voor bestanden die het hier expliciet
+  # meekrijgt, dus presentatie/slides.md blijft ook via deze hook ongemoeid.
+  - repo: local
+    hooks:
+      - id: prettier
+        name: prettier
+        entry: npx --no-install prettier --write --ignore-unknown
+        language: system
+        types_or: [markdown, yaml, json]
+
+      - id: markdownlint
+        name: markdownlint
+        entry: npx --no-install markdownlint-cli2
+        language: system
+        types: [markdown]
+        pass_filenames: false

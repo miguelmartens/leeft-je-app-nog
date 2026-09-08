@@ -8,6 +8,9 @@ on:
     paths:
       - "presentatie/slides.md"
       - ".github/workflows/pages.yaml"
+      - "package.json"
+      - "package-lock.json"
+      - ".nvmrc"
   workflow_dispatch:
 
 permissions:
@@ -27,12 +30,18 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: "22"
+          node-version-file: .nvmrc
+          cache: npm
+
+      # De marp-versie komt uit package-lock.json, zodat de slides hier
+      # hetzelfde bouwen als op je eigen machine.
+      - name: Installeer de vastgelegde versies
+        run: npm ci
 
       # HTML: dit is wat er op GitHub Pages komt te staan.
       - name: Bouw de slides
         run: |
-          npx --yes @marp-team/marp-cli@latest presentatie/slides.md \
+          npx marp presentatie/slides.md \
             --html \
             -o dist/index.html
 
@@ -40,7 +49,7 @@ jobs:
       # Faalt dit ooit, dan is alleen deze stap het probleem - haal hem dan weg.
       - name: Exporteer PDF
         run: |
-          npx --yes @marp-team/marp-cli@latest presentatie/slides.md \
+          npx marp presentatie/slides.md \
             --html --allow-local-files \
             --pdf --pdf-notes \
             -o dist/probes-in-kubernetes.pdf

@@ -5,6 +5,7 @@ CLUSTER ?= probe-workshop
 IMAGE   ?= probe-demo:dev
 APP     ?= probe-demo
 DOCKER  ?= docker
+NPX     := npx --no-install
 URL     ?= http://127.0.0.1:30080
 
 GOED  := demo/k8s/deployment.yaml
@@ -14,7 +15,7 @@ KAPOT := demo/k8s/kapot
 
 .PHONY: help alles cluster build load deploy kapot-1 kapot-2 kapot-3 kapot-4 \
         herstel logs watch endpoints belasting unready dependency \
-        slides format format-check schoon
+        slides format format-check lint-md hooks schoon
 
 ##@ Opzetten
 
@@ -102,17 +103,29 @@ dependency: ## Zet de dependency om op ALLE pods (POST /debug/dependency-down)
 
 ##@ Overig
 
-slides: ## Serveer de slides lokaal met marp-cli
-	npx --yes @marp-team/marp-cli@latest -s presentatie/
+slides: node_modules ## Serveer de slides lokaal met marp-cli
+	$(NPX) marp -s presentatie/
 
-format: ## Formatteer alles: gofmt voor Go, Prettier voor Markdown en YAML
+format: node_modules ## Formatteer alles: gofmt voor Go, Prettier voor Markdown en YAML
 	gofmt -w demo
-	npx --yes prettier@3 --write . --ignore-unknown
+	$(NPX) prettier --write . --ignore-unknown
 
-format-check: ## Controleer de opmaak zonder iets te wijzigen
+format-check: node_modules ## Controleer de opmaak zonder iets te wijzigen
 	@scheef=$$(gofmt -l demo); \
 	if [ -n "$$scheef" ]; then echo "niet gofmt-schoon:"; echo "$$scheef"; exit 1; fi
-	npx --yes prettier@3 --check . --ignore-unknown
+	$(NPX) prettier --check . --ignore-unknown
+
+lint-md: node_modules ## Lint README.md en DRAAIBOEK.md met markdownlint
+	$(NPX) markdownlint-cli2
+
+hooks: ## Installeer de pre-commit hooks (pre-commit en pre-push)
+	pre-commit install
+
+# Geen .PHONY: npm ci draait alleen als package.json of de lockfile nieuwer is
+# dan de map zelf.
+node_modules: package.json package-lock.json
+	npm ci
+	@touch node_modules
 
 schoon: ## Verwijder het kind-cluster
 	kind delete cluster --name $(CLUSTER)

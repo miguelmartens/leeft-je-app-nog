@@ -7,17 +7,18 @@ De repo bevat drie dingen:
 - **`demo/`** — een Go-app die je op commando kunt stukmaken, plus het image
 - **`demo/k8s/`** — het goede manifest en vier varianten met precies één fout
 
-De slides staan online op **https://miguelmartens.github.io/leeft-je-app-nog/**.
+De slides staan online op **<https://miguelmartens.github.io/leeft-je-app-nog/>**.
 Het draaiboek voor de live demo staat in [`DRAAIBOEK.md`](DRAAIBOEK.md).
 
 ## Wat je nodig hebt
 
-| Tool                                               | Waarvoor                            |
-| -------------------------------------------------- | ----------------------------------- |
-| [kind](https://kind.sigs.k8s.io/)                  | het lokale cluster                  |
-| [kubectl](https://kubernetes.io/docs/tasks/tools/) | met het cluster praten              |
-| [Docker](https://docs.docker.com/get-docker/)      | het image bouwen                    |
-| [Go](https://go.dev/dl/) 1.27                      | alleen als je de app wilt aanpassen |
+| Tool                                               | Waarvoor                                    |
+| -------------------------------------------------- | ------------------------------------------- |
+| [kind](https://kind.sigs.k8s.io/)                  | het lokale cluster                          |
+| [kubectl](https://kubernetes.io/docs/tasks/tools/) | met het cluster praten                      |
+| [Docker](https://docs.docker.com/get-docker/)      | het image bouwen                            |
+| [Go](https://go.dev/dl/) 1.27                      | alleen als je de app wilt aanpassen         |
+| [Node](https://nodejs.org/) (zie `.nvmrc`)         | alleen voor de slides en de opmaakcontroles |
 
 Kubernetes 1.30 of nieuwer, want het manifest gebruikt de `sleep`-preStop-hook.
 De node-image die kind standaard meelevert voldoet.
@@ -57,7 +58,7 @@ kubectl get pods -o wide
 
 Eén Go-bestand, geen dependencies, met de endpoints uit de presentatie:
 
-```
+```text
 GET  /startupz               ben ik opgestart?
 GET  /healthz                leef ik nog?          (startup + liveness probe)
 GET  /readyz                 mag ik verkeer?       (readiness probe)
@@ -112,11 +113,13 @@ Snelste weg: installeer de extensie **Marp for VS Code** en open
 Zonder VS Code:
 
 ```bash
-make slides     # live preview in je browser
-
-npx @marp-team/marp-cli@latest presentatie/slides.md --html -o dist/index.html
-npx @marp-team/marp-cli@latest presentatie/slides.md --pdf --pdf-notes -o dist/slides.pdf
+make slides           # live preview in je browser, haalt zelf npm ci op
+npm run slides:build  # eenmalig exporteren naar dist/index.html
 ```
+
+De marp-versie ligt vast in `package-lock.json`, zodat je lokaal hetzelfde
+bouwt als de workflow. Gebruik je nvm, dan pakt `nvm use` de versie uit
+`.nvmrc`.
 
 Druk in de HTML op `p` voor de presenter view met sprekersnotities, de volgende
 slide en een timer. De notities staan in het markdown-bestand als
@@ -132,3 +135,15 @@ readiness) lopen door de hele presentatie heen.
 `.github/workflows/pages.yaml` bouwt de slides bij elke push naar `main` en zet
 ze op GitHub Pages. Zet daarvoor eenmalig **Settings → Pages → Source** op
 _GitHub Actions_.
+
+## Meewerken aan de repo
+
+```bash
+make format       # gofmt + Prettier
+make format-check # dezelfde controle zonder te schrijven
+make lint-md      # markdownlint over README.md en DRAAIBOEK.md
+make hooks        # pre-commit installeren (optioneel)
+```
+
+`presentatie/slides.md` blijft met de hand opgemaakt: dat bestand staat in
+`.prettierignore` en wordt door markdownlint overgeslagen.
