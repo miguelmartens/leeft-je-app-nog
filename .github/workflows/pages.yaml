@@ -1,0 +1,60 @@
+name: Publiceer slides
+
+# Zet eenmalig in de repo-instellingen: Settings > Pages > Source: GitHub Actions.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "presentatie/slides.md"
+      - ".github/workflows/pages.yaml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      # HTML: dit is wat er op GitHub Pages komt te staan.
+      - name: Bouw de slides
+        run: |
+          npx --yes @marp-team/marp-cli@latest presentatie/slides.md \
+            --html \
+            -o dist/index.html
+
+      # PDF: handig als hand-out. Gebruikt de Chrome die op de runner staat.
+      # Faalt dit ooit, dan is alleen deze stap het probleem - haal hem dan weg.
+      - name: Exporteer PDF
+        run: |
+          npx --yes @marp-team/marp-cli@latest presentatie/slides.md \
+            --html --allow-local-files \
+            --pdf --pdf-notes \
+            -o dist/probes-in-kubernetes.pdf
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
