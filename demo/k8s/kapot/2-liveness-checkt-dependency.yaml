@@ -1,0 +1,108 @@
+# KAPOT 2 - de livenessProbe wijst naar /readyz in plaats van /healthz.
+# Wat je ziet: zodra de dependency wegvalt falen alle replica's tegelijk en
+#   herstart Kubernetes ze allemaal tegelijk. Eén hapering wordt een storing.
+# De fix: liveness wijst naar /healthz en kijkt alleen naar zichzelf.
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: probe-demo
+  labels:
+    app: probe-demo
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: probe-demo
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: probe-demo
+    spec:
+      # Ruim boven de preStop-pauze plus het langste verzoek.
+      terminationGracePeriodSeconds: 30
+      containers:
+        - name: app
+          image: probe-demo:dev
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+          env:
+            # Hoelang de app doet alsof hij aan het opstarten is.
+            - name: STARTUP_DELAY
+              value: "5s"
+          # Zonder resources kan een container zijn eigen probe niet op tijd
+          # beantwoorden en herstart hij zichzelf eindeloos.
+          resources:
+            requests:
+              cpu: 50m
+              memory: 32Mi
+            limits:
+              memory: 64Mi
+          securityContext:
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+
+          # 1. Ben ik opgestart? Zolang deze loopt, laten liveness en readiness
+          #    de container met rust. 24 x 5s = 120 seconden de tijd.
+          #    De app heeft ook een los /startupz; dat antwoordt hetzelfde.
+          startupProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            periodSeconds: 5
+            failureThreshold: 24
+
+          # 2. Leef ik nog? Kijkt alleen naar zichzelf, nooit naar een
+          #    dependency. Faalt deze, dan herstart Kubernetes de container.
+          #    Grijpt in na ongeveer 30 seconden (3 x 10s).
+          livenessProbe:
+            httpGet:
+              path: /readyz
+              port: 8080
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+
+          # 3. Mag ik verkeer? Mag wel een dependency checken. Faalt deze, dan
+          #    gaat dit pod uit de EndpointSlice - zonder herstart.
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: 8080
+            periodSeconds: 3
+            timeoutSeconds: 2
+            failureThreshold: 2
+
+          # Wacht met SIGTERM tot kube-proxy dit pod uit de EndpointSlice heeft
+          # gehaald. Het image heeft geen shell, dus exec kan hier niet; de
+          # ingebouwde sleep-hook van Kubernetes wel.
+          lifecycle:
+            preStop:
+              sleep:
+                seconds: 5
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: probe-demo
+  labels:
+    app: probe-demo
+spec:
+  type: NodePort
+  selector:
+    app: probe-demo
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8080
+      # Vast nummer, zodat kind-cluster.yaml hem naar localhost:30080 kan mappen.
+      nodePort: 30080
