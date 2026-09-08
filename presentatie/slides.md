@@ -138,6 +138,15 @@ section.title .legend span.badge { margin-left: 34px; }
 section.title .legend span.badge:first-child { margin-left: 0; }
 section.title .who { margin-top: 70px; font-size: 19px; color: var(--muted-d); }
 
+/* slotslide met de repo-link */
+section.title .repo { margin-top: 46px; font-size: 26px; }
+section.title .repo a {
+  color: #FFFFFF;
+  text-decoration: none;
+  border-bottom: 2px solid var(--amber);
+  padding-bottom: 4px;
+}
+
 section.title::after, section.dark::after { color: var(--muted-d); }
 </style>
 
@@ -871,6 +880,24 @@ Vraag elke keer eerst aan de zaal wat ze verwachten.
 <div class="note">Vragen? En daarna: naar de terminal.</div>
 
 <!--
-Sluit af met de repo-link en de vraag welk scenario ze morgen als eerste
-in hun eigen cluster gaan proberen.
+Vraag welk scenario ze morgen als eerste in hun eigen cluster gaan proberen.
+De repo-link staat op de volgende slide.
+-->
+
+---
+
+<!-- _class: title -->
+<!-- _paginate: false -->
+
+# Alles staat online
+
+<div class="sub">Slides, demo-app en de vijf scenario's</div>
+
+<div class="repo"><a href="https://github.com/miguelmartens/leeft-je-app-nog">github.com/miguelmartens/leeft-je-app-nog</a></div>
+
+<div class="who">Miguel Martens · Cegeka</div>
+
+<!--
+Laat deze slide staan tijdens de vragen, zodat iedereen de link kan overtypen.
+In de README staat hoe ze het cluster in tien minuten zelf opzetten.
 -->
