@@ -19,6 +19,9 @@ author: Miguel Martens
   --green: #1FA97A;
   --amber: #D98C1F;
   --red: #C4364C;
+  /* lichtere varianten, alleen voor tekst op een donkere achtergrond */
+  --green-l: #6FD9AE;
+  --amber-l: #F0B45C;
 }
 
 section {
@@ -64,6 +67,28 @@ pre {
   line-height: 1.45;
 }
 pre code { color: var(--light); background: none; }
+
+/* Syntaxkleuring. Marp levert de GitHub-kleuren voor een lichte achtergrond:
+   een string wordt #0a3069 en een yaml-key #0550ae. Dat donkerblauw valt weg
+   tegen het codeblok, en op een beamer lees je er helemaal niets meer van.
+   Hieronder dezelfde rolverdeling in de kleuren van deze deck: wit voor de
+   structuur, groen voor de waarde, amber voor het sleutelwoord. */
+pre {
+  --color-prettylights-syntax-storage-modifier-import: var(--light);
+  --color-prettylights-syntax-comment: var(--muted-d);
+  --color-prettylights-syntax-constant: #FFFFFF;
+  --color-prettylights-syntax-entity: #FFFFFF;
+  --color-prettylights-syntax-markup-heading: #FFFFFF;
+  --color-prettylights-syntax-markup-bold: #FFFFFF;
+  --color-prettylights-syntax-markup-italic: var(--light);
+  --color-prettylights-syntax-string: var(--green-l);
+  --color-prettylights-syntax-string-regexp: var(--green-l);
+  --color-prettylights-syntax-entity-tag: var(--green-l);
+  --color-prettylights-syntax-constant-other-reference-link: var(--green-l);
+  --color-prettylights-syntax-keyword: var(--amber-l);
+  --color-prettylights-syntax-variable: var(--amber-l);
+  --color-prettylights-syntax-markup-list: var(--amber-l);
+}
 
 /* kolommen */
 .cols  { display: grid; grid-template-columns: 1fr 1fr; gap: 26px; }
@@ -147,6 +172,17 @@ section.title .repo a {
   padding-bottom: 4px;
 }
 
+/* Het complete manifest: 23 regels yaml naast 22, en dat past niet op 20px.
+   Alleen op deze slide krimpt de code en levert de kop wat hoogte in, zodat
+   het hele manifest in beeld blijft in plaats van onderaan af te lopen. */
+section.manifest h1 { font-size: 42px; }
+section.manifest h1 + p em { margin-bottom: 14px; }
+section.manifest pre {
+  font-size: 15px;
+  line-height: 1.32;
+  padding: 14px 18px;
+}
+
 section.title::after, section.dark::after { color: var(--muted-d); }
 </style>
 
@@ -163,7 +199,7 @@ section.title::after, section.dark::after { color: var(--muted-d); }
 <span class="badge r">R</span> readiness
 </div>
 
-<div class="who">Miguel Martens · Cegeka</div>
+<div class="who">Miguel Martens</div>
 
 <!--
 Openingsvraag: wie heeft ooit een pod gehad die Running was terwijl de applicatie
@@ -658,6 +694,8 @@ dit is het antwoord. Dit kost mensen soms een halve dag.
 
 ---
 
+<!-- _class: manifest -->
+
 # Het complete manifest
 
 *Van je code, via je image, naar een draaiende pod*
@@ -895,7 +933,7 @@ De repo-link staat op de volgende slide.
 
 <div class="repo"><a href="https://github.com/miguelmartens/leeft-je-app-nog">github.com/miguelmartens/leeft-je-app-nog</a></div>
 
-<div class="who">Miguel Martens · Cegeka</div>
+<div class="who">Miguel Martens</div>
 
 <!--
 Laat deze slide staan tijdens de vragen, zodat iedereen de link kan overtypen.
