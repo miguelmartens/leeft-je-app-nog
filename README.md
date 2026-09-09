@@ -147,3 +147,13 @@ make hooks        # pre-commit installeren (optioneel)
 
 `presentatie/slides.md` blijft met de hand opgemaakt: dat bestand staat in
 `.prettierignore` en wordt door markdownlint overgeslagen.
+
+## Bronvermelding
+
+De inhoud van de presentatie en de manifests volgt de officiële Kubernetes-documentatie:
+
+- [Liveness, Readiness, and Startup Probes](https://kubernetes.io/docs/concepts/workloads/pods/probes/)
+  — het concept: de drie probes, de vier mechanismen (`exec`, `grpc`, `httpGet`,
+  `tcpSocket`) en waar het misgaat
+- [Configure Liveness, Readiness and Startup Probes](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/)
+  — de praktijk: hoe je ze instelt, met voorbeelden per mechanisme

@@ -216,7 +216,7 @@ niet werkte? Bijna alle handen gaan omhoog. Daar gaat deze sessie over.
 <div class="row"><span class="badge r">✓</span> Waarom Kubernetes niet zelf kan zien of je applicatie werkt</div>
 <div class="row"><span class="badge r">✓</span> Wat de drie probes doen en wanneer je welke gebruikt</div>
 <div class="row"><span class="badge r">✓</span> Waar je ze neerzet in je YAML, en wat je app moet antwoorden</div>
-<div class="row"><span class="badge r">✓</span> De drie fouten die vrijwel iedereen de eerste keer maakt</div>
+<div class="row"><span class="badge r">✓</span> De vier fouten die vrijwel iedereen de eerste keer maakt</div>
 </div>
 
 <div class="note">En daarna gaan we het live stukmaken. Dat is het leukste deel.</div>
@@ -561,6 +561,7 @@ http.HandleFunc("/readyz", func(w, r) {
 - Houd het snel: geen zware queries, geen schrijfacties
 - Geen authenticatie op deze endpoints — de kubelet logt niet in
 - Liveness checkt nooit een database. Readiness mag dat wel
+- Maar: checken alle replica's dezelfde database, dan gaan ze ook allemaal tegelijk uit de Service
 
 </div>
 </div>
@@ -771,13 +772,14 @@ een lifecycle preStop en een Service onder zet - die staan in de repo.
 
 <!-- _class: dark -->
 
-# Drie fouten die vrijwel iedereen maakt
+# Vier fouten die vrijwel iedereen maakt
 
 *En die er in een code review prima uitzien*
 
 <div class="rows">
 <div class="row"><span class="badge l">✕</span><div><strong>Hetzelfde pad voor liveness en readiness</strong><br><span class="dim">Dan heb je geen readiness meer, maar een tweede manier om te herstarten.</span></div></div>
 <div class="row"><span class="badge l">✕</span><div><strong>De liveness probe checkt de database</strong><br><span class="dim">De database hapert even, alle replica's falen tegelijk en herstarten tegelijk. Een klein probleem wordt een storing.</span></div></div>
+<div class="row"><span class="badge l">✕</span><div><strong>De readiness probe checkt een gedeelde dependency</strong><br><span class="dim">Alle replica's gaan tegelijk uit de Service. Nul endpoints, terwijl de pods zelf prima werken - ook voor verzoeken die de database niet nodig hebben.</span></div></div>
 <div class="row"><span class="badge l">✕</span><div><strong>Geen resources ingesteld op de container</strong><br><span class="dim">Een container met te weinig CPU kan zijn eigen probe niet op tijd beantwoorden en herstart zichzelf eindeloos.</span></div></div>
 </div>
 
@@ -786,6 +788,9 @@ een lifecycle preStop en een Service onder zet - die staan in de repo.
 <!--
 Fout 2 is de belangrijkste. Vraag de zaal wat er gebeurt als tien replica's
 tegelijk herstarten op een database die het al zwaar heeft.
+Fout 3 is de spiegel daarvan: niemand herstart, maar er blijft ook geen pod over
+om verkeer naartoe te sturen. Uit de Service halen helpt alleen als er nog een
+gezond pod is - bij een gedeelde database is dat er niet.
 -->
 
 ---
