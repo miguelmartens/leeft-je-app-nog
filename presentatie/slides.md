@@ -499,7 +499,7 @@ Bij een drukke app faalt dan de probe, niet de app.
 
 ## Het probleem
 
-Je app heeft 60 seconden nodig om op te starten. De liveness probe begint al na 10 seconden te vragen en grijpt na 30 seconden in.
+Je app heeft 60 seconden nodig om op te starten. De liveness probe begint meteen te vragen en grijpt na ongeveer 30 seconden in.
 
 Je app wordt dus herstart voordat hij ooit klaar is. Steeds opnieuw. Je ziet CrashLoopBackOff, en het lijkt een bug in je code.
 
@@ -538,12 +538,12 @@ wat er mis is, en voeg dan pas de startup probe toe.
 
 ```go
 // liveness: kijkt alleen naar zichzelf
-http.HandleFunc("/healthz", func(w, r) {
+http.HandleFunc("/healthz", func(w http.ResponseWriter, _ *http.Request) {
     w.WriteHeader(200)
 })
 
 // readiness: mag wel dependencies checken
-http.HandleFunc("/readyz", func(w, r) {
+http.HandleFunc("/readyz", func(w http.ResponseWriter, _ *http.Request) {
     if !db.Bereikbaar() {
         w.WriteHeader(503)
         return
@@ -591,8 +591,9 @@ Die z zat erachter om botsingen te voorkomen met echte URL's in de applicatie ze
 
 ## Waar je het nu nog ziet
 
-- Kubernetes zelf: de API-server heeft `/livez` en `/readyz`
-- Prometheus gebruikt hetzelfde patroon — geschreven door ex-Googlers
+- Kubernetes zelf: de API-server heeft `/livez` en `/readyz`; `/healthz` is daar sinds v1.16 deprecated
+- De control-plane-componenten hebben ook z-pages: `/statusz` en `/flagz` (beta, feature gate)
+- Prometheus koos juist een eigen draai: `/-/healthy` en `/-/ready`
 - In vrijwel elk voorbeeld op internet, inclusief deze presentatie
 - Je mag ook gewoon `/health` nemen. Kubernetes kijkt alleen naar de statuscode
 
@@ -607,6 +608,10 @@ $ kubectl get --raw='/livez?verbose'      # probeer dit eens op je eigen cluster
 Leuk weetje om de aandacht even vast te houden na een blok techniek.
 Draai het kubectl-commando live: de API-server laat dan zijn eigen checklist zien.
 Benadruk dat het een gewoonte is en geen standaard - er is geen RFC die /healthz voorschrijft.
+
+Bronnen:
+- https://kubernetes.io/docs/reference/using-api/health-checks/
+- https://kubernetes.io/docs/reference/instrumentation/zpages/
 -->
 
 ---
@@ -842,7 +847,7 @@ Dit is demo-scenario 5 en meestal de grootste eyeopener: dezelfde app,
 <div>
 
 ```console
-GET  /startupz    ben ik opgestart?
+GET  /startupz    ben ik opgestart?  (handmatig)
 GET  /healthz     leef ik nog?
 GET  /readyz      mag ik verkeer?
 GET  /work        het echte werk
